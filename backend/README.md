@@ -99,3 +99,5 @@ Optional SMTP environment variables:
 - `SMTP_PASS`
 - `SMTP_FROM`
 - `ADMIN_PASSWORD_RESET_URL_BASE`
+
+When SMTP is configured, the backend also sends HTML alert emails (for example hot-wallet low-balance notifications) using the same transport. Set `ALERT_EMAIL_RECIPIENTS` to a comma-separated list of operator addresses. If SMTP is not configured, alert content is logged at `info` level for local development.

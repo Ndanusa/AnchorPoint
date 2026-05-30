@@ -1,6 +1,5 @@
-import nodemailer from 'nodemailer';
-
 import { config } from '../config/env';
+import { createSmtpTransporter, isSmtpConfigured } from '../lib/smtp/create-transporter';
 import logger from '../utils/logger';
 
 export interface PasswordResetEmailInput {
@@ -17,7 +16,7 @@ export class SmtpAdminEmailService implements AdminEmailService {
   async sendPasswordResetEmail(input: PasswordResetEmailInput): Promise<void> {
     const resetUrl = `${config.ADMIN_PASSWORD_RESET_URL_BASE}?token=${encodeURIComponent(input.token)}`;
 
-    if (!config.SMTP_HOST || !config.SMTP_PORT || !config.SMTP_FROM) {
+    if (!isSmtpConfigured()) {
       logger.info('SMTP not configured; password reset email logged for development', {
         to: input.to,
         resetUrl,
@@ -26,18 +25,7 @@ export class SmtpAdminEmailService implements AdminEmailService {
       return;
     }
 
-    const transporter = nodemailer.createTransport({
-      host: config.SMTP_HOST,
-      port: config.SMTP_PORT,
-      secure: config.SMTP_PORT === 465,
-      auth:
-        config.SMTP_USER && config.SMTP_PASS
-          ? {
-              user: config.SMTP_USER,
-              pass: config.SMTP_PASS,
-            }
-          : undefined,
-    });
+    const transporter = createSmtpTransporter();
 
     await transporter.sendMail({
       from: config.SMTP_FROM,
